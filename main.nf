@@ -25,6 +25,7 @@ include { NCHG } from './subworkflows/nchg.nf' params(
                                                     skip_expected_plots: params.nchg_skip_plots,
                                                     skip_sign_interaction_plots: params.nchg_skip_plots,
                                                )
+include { PREPROCESSING } from './subworkflows/preprocessing.nf'
 
 
 workflow {
@@ -47,6 +48,7 @@ workflow {
     log.info("-- assembly_gaps: ${params.assembly_gaps}")
 
     log.info("-- chrom3d_args: ${params.chrom3d_args}")
+    log.info("-- ploidy: ${params.ploidy}")
     log.info("-- number_of_models: ${params.number_of_models}")
 
     log.info("-- nchg_mad_max: ${params.nchg_mad_max}")
@@ -79,6 +81,12 @@ workflow {
         params.nchg_bad_bin_fraction,
         params.cytoband,
         params.assembly_gaps
+    )
+
+    PREPROCESSING(
+        sample_sheet,
+        NCHG.out.tsv,
+        params.ploidy
     )
 
 }
