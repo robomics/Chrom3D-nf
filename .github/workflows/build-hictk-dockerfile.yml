@@ -7,22 +7,22 @@ on:
   push:
     branches: [ main ]
     paths:
-      - ".github/workflows/build-hictk*dockerfile.yml"
+      - ".github/workflows/build-hictk-dockerfile.yml"
       - ".github/workflows/build-dockerfile.yml"
-      - "containers/hictk*.Dockerfile"
+      - "containers/hictk_*.Dockerfile"
   pull_request:
     branches: [ main ]
     paths:
-      - ".github/workflows/build-hictk*dockerfile.yml"
+      - ".github/workflows/build-hictk-dockerfile.yml"
       - ".github/workflows/build-dockerfile.yml"
-      - "containers/hictk*.Dockerfile"
+      - "containers/hictk_*.Dockerfile"
 
 jobs:
   build-hictk-dockerfile:
     name: Build hictk Dockerfile
     uses: robomics/chrom3d-nf/.github/workflows/build-dockerfile.yml@main
     with:
-      dockerfile-glob: "containers/hictk*.Dockerfile"
+      dockerfile-glob: "containers/hictk_*.Dockerfile"
 
     permissions:
       contents: read
