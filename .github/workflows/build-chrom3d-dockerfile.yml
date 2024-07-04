@@ -9,17 +9,19 @@ on:
     paths:
       - ".github/workflows/build-chrom3d*dockerfile.yml"
       - ".github/workflows/build-dockerfile.yml"
+      - "containers/patches/chrom3d*.patch"
       - "containers/chrom3d*.Dockerfile"
   pull_request:
     branches: [ main ]
     paths:
       - ".github/workflows/build-chrom3d*dockerfile.yml"
       - ".github/workflows/build-dockerfile.yml"
+      - "containers/patches/chrom3d*.patch"
       - "containers/chrom3d*.Dockerfile"
 
 jobs:
-  build-utils-dockerfile:
-    name: Build utils Dockerfile
+  build-chrom3d-dockerfile:
+    name: Build Chrom3D Dockerfile
     uses: robomics/chrom3d-nf/.github/workflows/build-dockerfile.yml@main
     with:
       dockerfile-glob: "containers/chrom3d*.Dockerfile"
