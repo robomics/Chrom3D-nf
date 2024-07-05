@@ -50,6 +50,12 @@ def import_beads(path_to_beads: pathlib.Path, chrom_sizes: pd.DataFrame) -> pd.D
     return pd.concat([beads, bf.complement(beads, chrom_sizes)])[["chrom", "start", "end"]]
 
 
+def intersect_with_lads(beads: pd.DataFrame, lads: pd.DataFrame) -> pd.DataFrame:
+    df = bf.count_overlaps(beads, lads)
+    df.loc[df["count"] != 0, "periphery"] = "1"
+    return df[beads.columns.tolist()]
+
+
 def generate_gtrack(beads: pd.DataFrame, sig_interactions: pd.DataFrame, lads: pathlib.Path):
     records = {}
 
@@ -78,9 +84,8 @@ def generate_gtrack(beads: pd.DataFrame, sig_interactions: pd.DataFrame, lads: p
     beads = pd.DataFrame(data, columns=["chrom", "start", "end", "tid", "radius", "periphery", "edges"])
 
     if lads is not None:
-        cols = beads.columns.tolist()
         lads = pd.read_table(lads, usecols=list(range(3)), names=["chrom", "start", "end"])
-        beads = bf.overlap(beads, lads)[cols]
+        return intersect_with_lads(beads, lads)
 
     return beads
 
