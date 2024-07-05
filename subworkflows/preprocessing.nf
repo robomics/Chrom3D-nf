@@ -147,20 +147,18 @@ process MAKE_BEAD_GTRACK {
 
     shell:
         outprefix="${sample}"
+        args = []
+        if (!lads.toString().isEmpty()) {
+            opts.push("--lads='${lads}'")
+        }
+        args=args.join(" ")
         '''
         make_bead_file.py \\
             '!{sig_interactions}' \\
             '!{beads}' \\
             '!{chrom_sizes}' \\
+            !{args} \\
             > '!{sample}.beads.gtrack'
-
-        if [ -n '!{lads}' ]; then
-            ovelrap_beads_with_lads.py \\
-                '!{sample}.beads.gtrack' \\
-                '!{lads}' \\
-                > '!{sample}.beads.lads.gtrack'
-            rm '!{sample}.bead.gtrack'
-        fi
         '''
 }
 
