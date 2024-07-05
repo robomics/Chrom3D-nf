@@ -102,7 +102,6 @@ def main():
     beads = import_beads(args["domains"], chrom_sizes)
 
     beads = generate_gtrack(beads, sig_interactions, args["lads"])
-    print(beads, file=sys.stderr)
     beads = bf.sort_bedframe(beads, chrom_sizes)
 
     print("##gtrack version: 1.0")
