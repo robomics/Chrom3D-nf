@@ -39,7 +39,7 @@ def make_cli() -> argparse.ArgumentParser:
 
 
 def import_beads(path_to_beads: pathlib.Path, chrom_sizes: pd.DataFrame) -> pd.DataFrame:
-    beads = pd.read_table(path_to_beads, usecols=list(range(3)), names=["chrom", "start", "end"])
+    beads = pd.read_table(path_to_beads, skiprows=1, usecols=list(range(3)), names=["chrom", "start", "end"])
 
     beads = pd.concat([beads, bf.complement(beads, chrom_sizes)])
     return bf.sort_bedframe(beads)[["chrom", "start", "end"]]
@@ -60,7 +60,7 @@ def generate_gtrack(beads: pd.DataFrame, sig_interactions):
             records[r] = ()
 
     print("##gtrack version: 1.0")
-    print("##track type: linked segments\n")
+    print("##track type: linked segments")
     print("###seqid\tstart\tend\tid\tradius\tperiphery\tedges")
 
     for k, v in records.items():

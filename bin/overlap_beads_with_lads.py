@@ -44,7 +44,7 @@ def main():
     beads = bf.overlap(beads, lads)
 
     print("##gtrack version: 1.0")
-    print("##track type: linked segments\n")
+    print("##track type: linked segments")
     print("###seqid\tstart\tend\tid\tradius\tperiphery\tedges")
 
     beads.to_csv(sys.stdout, sep="\t", header=False, index=False)

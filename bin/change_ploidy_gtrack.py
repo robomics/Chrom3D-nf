@@ -41,7 +41,7 @@ def main():
     )
 
     print("##gtrack version: 1.0")
-    print("##track type: linked segments\n")
+    print("##track type: linked segments")
     print("###seqid\tstart\tend\tid\tradius\tperiphery\tedges")
 
     ploidy = args["ploidy"]

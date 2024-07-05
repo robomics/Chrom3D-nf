@@ -165,6 +165,10 @@ process MAKE_BEAD_GTRACK {
 }
 
 process CHANGE_PLOIDY {
+    publishDir "${params.publish_dir}/gtracks",
+        enabled: !!params.publish_dir,
+        mode: params.publish_dir_mode
+
     label 'duration_very_short'
     tag "${sample}"
 
