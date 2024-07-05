@@ -7,25 +7,38 @@ nextflow.enable.dsl=2
 
 params.publish_dir = params.outdir
 
+NCHG_PARAMS = [
+    publish_dir: "${params.outdir}/nchg/",
+    publish_dir_mode: params.publish_dir_mode,
+    use_cis_interactions: true,
+    use_trans_interactions: true,
+    zstd_compression_lvl: params.zstd_compression_lvl,
+    fdr_cis: params.nchg_fdr_cis,
+    fdr_trans: params.nchg_fdr_trans,
+    log_ratio_cis: params.nchg_log_ratio_cis,
+    log_ratio_trans: params.nchg_log_ratio_trans,
+    plot_format : params.plot_format,
+    hic_tgt_resolution_plots : 500000,
+    plot_sig_interactions_cmap_lb : null,
+    plot_sig_interactions_cmap_ub : 2.0,
+    skip_expected_plots: params.nchg_skip_plots,
+    skip_sign_interaction_plots: params.nchg_skip_plots,
+]
+
+PREPROCESSING_PARAMS = [
+    publish_dir: "${params.outdir}/gtracks/",
+    publish_dir_mode: params.publish_dir_mode,
+]
+
+CHROM3D_PARAMS = [
+    publish_dir: "${params.outdir}/chrom3d/",
+    publish_dir_mode: params.publish_dir_mode,
+]
+
 include { SAMPLESHEET } from './subworkflows/samplesheet.nf'
-include { NCHG } from './subworkflows/nchg.nf' params(
-                                                    publish_dir: "${params.outdir}/nchg/",
-                                                    publish_dir_mode: params.publish_dir_mode,
-                                                    use_cis_interactions: true,
-                                                    use_trans_interactions: true,
-                                                    zstd_compression_lvl: params.zstd_compression_lvl,
-                                                    fdr_cis: params.nchg_fdr_cis,
-                                                    fdr_trans: params.nchg_fdr_trans,
-                                                    log_ratio_cis: params.nchg_log_ratio_cis,
-                                                    log_ratio_trans: params.nchg_log_ratio_trans,
-                                                    plot_format : params.plot_format,
-                                                    hic_tgt_resolution_plots : 500000,
-                                                    plot_sig_interactions_cmap_lb : null,
-                                                    plot_sig_interactions_cmap_ub : 2.0,
-                                                    skip_expected_plots: params.nchg_skip_plots,
-                                                    skip_sign_interaction_plots: params.nchg_skip_plots,
-                                               )
-include { PREPROCESSING } from './subworkflows/preprocessing.nf'
+include { NCHG } from './subworkflows/nchg.nf' params(NCHG_PARAMS)
+include { PREPROCESSING } from './subworkflows/preprocessing.nf' params(PREPROCESSING_PARAMS)
+include { CHROM3D } from './subworkflows/chrom3d.nf' params(CHROM3D_PARAMS)
 
 
 workflow {
@@ -87,6 +100,12 @@ workflow {
         sample_sheet,
         NCHG.out.tsv,
         params.ploidy
+    )
+
+    CHROM3D(
+        PREPROCESSING.out.gtrack,
+        params.chrom3d_args,
+        params.number_of_models
     )
 
 }
