@@ -25,7 +25,7 @@ workflow CHROM3D {
             }
             .set { seeds }
 
-        beads.join(seeds)
+        beads.combine(seeds, by: 0)
             .set { chrom3d_tasks }
 
         SIMULATE(
@@ -44,6 +44,8 @@ workflow CHROM3D {
 
 process GENERATE_SEEDS {
     label 'process_very_short'
+
+    tag "${sample}"
 
     input:
         tuple val(sample),
@@ -64,6 +66,9 @@ process GENERATE_SEEDS {
 
 process SIMULATE {
     tag "${sample}_${id}"
+
+    label 'error_retry'
+    label 'duration_long'
 
     input:
         tuple val(sample),

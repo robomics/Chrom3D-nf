@@ -416,7 +416,7 @@ process COMPUTE{
 
         opts=[]
 
-        if (!domains.isEmpty()) {
+        if (!domains.toString().isEmpty()) {
             opts.push("--domains='domains.bed'")
         }
 

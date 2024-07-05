@@ -55,6 +55,8 @@ workflow PREPROCESSING {
 
                 if (doms.size() == 0) {
                     doms = bins
+                } else {
+                    doms = doms[0]
                 }
 
                 return tuple(it[0], file(doms))
