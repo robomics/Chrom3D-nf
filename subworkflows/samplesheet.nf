@@ -81,13 +81,17 @@ workflow SAMPLESHEET {
             files_from_sample_sheet.collect()
         )
 
-        NCHG(
+        NCHG_CIS(
+            CHECK_FILES.out.tsv
+        )
+        NCHG_TRANS(
             CHECK_FILES.out.tsv
         )
 
     emit:
         tsv = CHECK_FILES.out.tsv
-        nchg = NCHG.out.tsv
+        nchg_cis = NCHG_CIS.out.tsv
+        nchg_trans = NCHG_TRANS.out.tsv
 }
 
 process GENERATE {
@@ -159,7 +163,7 @@ process CHECK_FILES {
         '''
 }
 
-process NCHG {
+process NCHG_CIS {
     label 'duration_very_short'
 
     cpus 1
@@ -168,12 +172,37 @@ process NCHG {
         path sample_sheet
 
     output:
-        path "${sample_sheet}", emit: tsv
+        path "*.tsv", emit: tsv
 
     shell:
         '''
-        printf 'sample\\thic_file\\tresolution\\ttads\\tmask' > sample_sheet.nchg.tsv
+        printf 'sample\\thic_file\\tresolution\\ttads\\tmask\\n' > sample_sheet.cis.nchg.tsv
         # Drop LADs column
-        cut -f 1-4,6 '!{sample_sheet}' | tail -n +2 >> sample_sheet.nchg.tsv
+        cut -f 1-4,6 '!{sample_sheet}' |
+            tail -n +2 |
+            perl -pe 's/^(.*?)\\t/\\1_cis\\t/' \\
+            >> sample_sheet.cis.nchg.tsv
+        '''
+}
+
+process NCHG_TRANS {
+    label 'duration_very_short'
+
+    cpus 1
+
+    input:
+        path sample_sheet
+
+    output:
+        path "*.tsv", emit: tsv
+
+    shell:
+        '''
+        printf 'sample\\thic_file\\tresolution\\ttads\\tmask\\n' > sample_sheet.trans.nchg.tsv
+        # Drop LADs column
+        cut -f 1-4,7 '!{sample_sheet}' |
+            tail -n +2 |
+            perl -pe 's/^(.*?)\\t/\\1_trans\\t/' \\
+            >> sample_sheet.trans.nchg.tsv
         '''
 }

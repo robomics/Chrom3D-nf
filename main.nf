@@ -25,6 +25,12 @@ NCHG_PARAMS = [
     skip_sign_interaction_plots: params.nchg_skip_plots,
 ]
 
+NCHG_CIS_PARAMS = NCHG_PARAMS.clone()
+NCHG_CIS_PARAMS["use_trans_interactions"] = false
+
+NCHG_TRANS_PARAMS = NCHG_PARAMS.clone()
+NCHG_TRANS_PARAMS["use_cis_interactions"] = false
+
 PREPROCESSING_PARAMS = [
     publish_dir: "${params.outdir}/gtracks/",
     publish_dir_mode: params.publish_dir_mode,
@@ -36,7 +42,8 @@ CHROM3D_PARAMS = [
 ]
 
 include { SAMPLESHEET } from './subworkflows/samplesheet.nf'
-include { NCHG } from './subworkflows/nchg.nf' params(NCHG_PARAMS)
+include { NCHG as NCHG_CIS } from './subworkflows/nchg.nf' params(NCHG_CIS_PARAMS)
+include { NCHG as NCHG_TRANS } from './subworkflows/nchg.nf' params(NCHG_TRANS_PARAMS)
 include { PREPROCESSING } from './subworkflows/preprocessing.nf' params(PREPROCESSING_PARAMS)
 include { CHROM3D } from './subworkflows/chrom3d.nf' params(CHROM3D_PARAMS)
 
@@ -86,19 +93,43 @@ workflow {
     )
 
     SAMPLESHEET.out.tsv.set { sample_sheet }
-    SAMPLESHEET.out.nchg.set { nchg_sample_sheet }
+    SAMPLESHEET.out.nchg_cis.set { nchg_cis_sample_sheet }
+    SAMPLESHEET.out.nchg_trans.set { nchg_trans_sample_sheet }
 
-    NCHG(
-        nchg_sample_sheet,
+    NCHG_CIS(
+        nchg_cis_sample_sheet,
         params.nchg_mad_max,
         params.nchg_bad_bin_fraction,
         params.cytoband,
         params.assembly_gaps
     )
 
+    NCHG_TRANS(
+        nchg_trans_sample_sheet,
+        params.nchg_mad_max,
+        params.nchg_bad_bin_fraction,
+        params.cytoband,
+        params.assembly_gaps
+    )
+
+    NCHG_CIS.out.tsv
+        .map {
+            sample = it[0] - ~/_cis$/
+            tuple(sample, it[1])
+        }
+        .set { nchg_sig_interactions_cis }
+
+    NCHG_TRANS.out.tsv
+        .map {
+            sample = it[0] - ~/_trans$/
+            tuple(sample, it[1])
+        }
+        .set { nchg_sig_interactions_trans }
+
     PREPROCESSING(
         sample_sheet,
-        NCHG.out.tsv,
+        nchg_sig_interactions_cis,
+        nchg_sig_interactions_trans,
         params.ploidy
     )
 

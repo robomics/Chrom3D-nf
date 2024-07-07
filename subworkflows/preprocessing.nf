@@ -15,7 +15,8 @@ workflow PREPROCESSING {
 
     take:
         sample_sheet
-        sig_interactions
+        sig_interactions_cis
+        sig_interactions_trans
         ploidy
 
     main:
@@ -39,6 +40,14 @@ workflow PREPROCESSING {
             .map { row -> tuple(row.sample, make_optional_input(row.lads))
             }
             .set { lads }
+
+        sig_interactions_cis.join(sig_interactions_trans)
+            .map { tuple(it[0], tuple(it[1], it[2])) }
+            .set { sig_interactions }
+
+        MERGE(
+            sig_interactions
+        )
 
         DUMP_CHROM_SIZES(
             hic_files
@@ -67,7 +76,7 @@ workflow PREPROCESSING {
         DUMP_CHROM_SIZES.out.chrom_sizes
             .join(beads)
             .join(lads)
-            .join(sig_interactions)
+            .join(MERGE.out.tsv)
             .set { make_bead_gtrak_tasks }
 
         MAKE_BEAD_GTRACK(
@@ -81,6 +90,37 @@ workflow PREPROCESSING {
 
     emit:
         gtrack = CHANGE_PLOIDY.out.gtrack
+}
+
+process MERGE {
+    label 'duration_very_short'
+    tag "${sample}"
+
+    cpus 1
+
+    input:
+        tuple val(sample),
+              path(interactions)
+
+    output:
+        tuple val(sample),
+              path(outname),
+        emit: tsv
+
+    shell:
+        outname="${sample}.sig_interactions.tsv.gz"
+        '''
+        #!/usr/bin/env python3
+
+        import pandas as pd
+
+        paths = "!{interactions}".split(" ")
+        dfs = [pd.read_table(p) for p in paths]
+
+        df = pd.concat(dfs).sort_values(["chrom1", "start1", "chrom2", "start2"])
+
+        df.to_csv("!{outname}", sep="\\t", header=True, index=False, compression="gzip")
+        '''
 }
 
 process DUMP_CHROM_SIZES {

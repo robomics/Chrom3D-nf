@@ -133,7 +133,11 @@ def main():
             if path != "":
                 check_is_valid_bed3(path)
 
-        for path in df["mask"].fillna(""):
+        for path in df["mask_cis"].fillna(""):
+            if path != "":
+                check_is_valid_bed3(path)
+
+        for path in df["mask_trans"].fillna(""):
             if path != "":
                 check_is_valid_bed3(path)
 
@@ -145,7 +149,7 @@ def main():
 
 
 if __name__ == "__main__":
-    EXPECTED_COLUMNS = tuple(["sample", "hic_file", "resolution", "domains", "lads", "mask"])
+    EXPECTED_COLUMNS = tuple(["sample", "hic_file", "resolution", "domains", "lads", "mask_cis", "mask_trans"])
     args = vars(make_cli().parse_args())
     sample_sheet = args["tsv"]
     detached = args["detached"]
