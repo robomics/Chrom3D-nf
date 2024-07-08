@@ -6,6 +6,7 @@
 import argparse
 import pathlib
 import sys
+from typing import Union
 
 import bioframe as bf
 import pandas as pd
@@ -42,6 +43,13 @@ def make_cli() -> argparse.ArgumentParser:
         help="Path to a BED3+ file with the list of LADs",
     )
 
+    cli.add_argument(
+        "--masked-chromosomes",
+        type=str,
+        default="chrY,chrM",
+        help="Comma-separated list of chromosomes to be masked out.",
+    )
+
     return cli
 
 
@@ -50,13 +58,25 @@ def import_beads(path_to_beads: pathlib.Path, chrom_sizes: pd.DataFrame) -> pd.D
     return pd.concat([beads, bf.complement(beads, chrom_sizes)])[["chrom", "start", "end"]]
 
 
+def mask_chromosomes(df: pd.DataFrame, chroms: str) -> pd.DataFrame:
+    for chrom in chroms.split(","):
+        if "chrom" in df:
+            df = df[df["chrom"] != chrom]
+        else:
+            df = df[(df["chrom1"] != chrom) & (df["chrom2"] != chrom)]
+
+    return df
+
+
 def intersect_with_lads(beads: pd.DataFrame, lads: pd.DataFrame) -> pd.DataFrame:
     df = bf.count_overlaps(beads, lads)
     df.loc[df["count"] != 0, "periphery"] = "1"
     return df[beads.columns.tolist()]
 
 
-def generate_gtrack(beads: pd.DataFrame, sig_interactions: pd.DataFrame, lads: pathlib.Path):
+def generate_gtrack(
+    beads: pd.DataFrame, sig_interactions: pd.DataFrame, lads: Union[pd.DataFrame, None]
+) -> pd.DataFrame:
     records = {}
 
     for chrom1, start1, end1, chrom2, start2, end2 in sig_interactions.itertuples(index=False):
@@ -88,7 +108,6 @@ def generate_gtrack(beads: pd.DataFrame, sig_interactions: pd.DataFrame, lads: p
     beads = pd.DataFrame(data, columns=["chrom", "start", "end", "tid", "radius", "periphery", "edges"])
 
     if lads is not None:
-        lads = pd.read_table(lads, usecols=list(range(3)), names=["chrom", "start", "end"])
         return intersect_with_lads(beads, lads)
 
     return beads
@@ -105,7 +124,16 @@ def main():
     )
     beads = import_beads(args["domains"], chrom_sizes)
 
-    beads = generate_gtrack(beads, sig_interactions, args["lads"])
+    lads = None
+    if args["lads"] is not None:
+        lads = pd.read_table(args["lads"], usecols=list(range(3)), names=["chrom", "start", "end"])
+
+    if args["masked_chromosomes"] is not None:
+        beads = mask_chromosomes(beads, args["masked_chromosomes"])
+        sig_interactions = mask_chromosomes(sig_interactions, args["masked_chromosomes"])
+        lads = mask_chromosomes(lads, args["masked_chromosomes"])
+
+    beads = generate_gtrack(beads, sig_interactions, lads)
     beads = bf.sort_bedframe(beads, chrom_sizes)
 
     print("##gtrack version: 1.0")

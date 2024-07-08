@@ -65,8 +65,10 @@ workflow {
     }
     log.info("-- outdir: ${params.outdir}")
     log.info("-- publish_dir_mode: ${params.publish_dir_mode}")
+
     log.info("-- cytoband: ${params.cytoband}")
     log.info("-- assembly_gaps: ${params.assembly_gaps}")
+    log.info("-- masked_chromosomes: ${params.masked_chromosomes}")
 
     log.info("-- chrom3d_args: ${params.chrom3d_args}")
     log.info("-- ploidy: ${params.ploidy}")
@@ -132,7 +134,8 @@ workflow {
         sample_sheet,
         nchg_sig_interactions_cis,
         nchg_sig_interactions_trans,
-        params.ploidy
+        params.ploidy,
+        params.masked_chromosomes
     )
 
     CHROM3D(

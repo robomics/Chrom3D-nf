@@ -18,6 +18,7 @@ workflow PREPROCESSING {
         sig_interactions_cis
         sig_interactions_trans
         ploidy
+        masked_chromosomes
 
     main:
 
@@ -81,6 +82,7 @@ workflow PREPROCESSING {
 
         MAKE_BEAD_GTRACK(
             make_bead_gtrak_tasks,
+            masked_chromosomes
         )
 
         CHANGE_PLOIDY(
@@ -182,6 +184,8 @@ process MAKE_BEAD_GTRACK {
               path(lads),
               path(sig_interactions)
 
+        val masked_chromosomes
+
     output:
         tuple val(sample),
               path("*.gtrack"),
@@ -192,6 +196,9 @@ process MAKE_BEAD_GTRACK {
         args = []
         if (!lads.toString().isEmpty()) {
             args.push("--lads='${lads}'")
+        }
+        if (!masked_chromosomes.isEmpty()) {
+            args.push("--masked-chromosomes='${masked_chromosomes}'")
         }
         args=args.join(" ")
         '''
