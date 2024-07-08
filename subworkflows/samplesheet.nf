@@ -19,12 +19,16 @@ def parse_sample_sheet_row(row) {
     files = [hic_fname]
 
     domains = make_optional_input(row.domains)
-    mask = make_optional_input(row.mask)
+    lads = make_optional_input(row.lads)
+    mask_cis = make_optional_input(row.mask_cis)
+    mask_trans = make_optional_input(row.mask_trans)
 
     tuple(row.sample,
           files,
           domains,
-          mask)
+          lads,
+          mask_cis,
+          mask_trans)
 }
 
 
@@ -69,7 +73,7 @@ workflow SAMPLESHEET {
             .map {
                     it = parse_sample_sheet_row(it)
                     // Concatenate path to coolers and optional files
-                    it[1] + it[2] + it[3]
+                    it[1] + it[2] + it[3] + it[4] + it[5]
             }
             .flatten()
             .unique()
@@ -176,7 +180,7 @@ process NCHG_CIS {
 
     shell:
         '''
-        printf 'sample\\thic_file\\tresolution\\ttads\\tmask\\n' > sample_sheet.cis.nchg.tsv
+        printf 'sample\\thic_file\\tresolution\\tdomains\\tmask\\n' > sample_sheet.cis.nchg.tsv
         # Drop LADs column
         cut -f 1-4,6 '!{sample_sheet}' |
             tail -n +2 |
@@ -198,7 +202,7 @@ process NCHG_TRANS {
 
     shell:
         '''
-        printf 'sample\\thic_file\\tresolution\\ttads\\tmask\\n' > sample_sheet.trans.nchg.tsv
+        printf 'sample\\thic_file\\tresolution\\tdomains\\tmask\\n' > sample_sheet.trans.nchg.tsv
         # Drop LADs column
         cut -f 1-4,7 '!{sample_sheet}' |
             tail -n +2 |
