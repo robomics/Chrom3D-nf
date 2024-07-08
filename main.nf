@@ -32,7 +32,7 @@ NCHG_TRANS_PARAMS = NCHG_PARAMS.clone()
 NCHG_TRANS_PARAMS["use_cis_interactions"] = false
 
 PREPROCESSING_PARAMS = [
-    publish_dir: "${params.outdir}/gtracks/",
+    publish_dir: params.outdir,
     publish_dir_mode: params.publish_dir_mode,
 ]
 
