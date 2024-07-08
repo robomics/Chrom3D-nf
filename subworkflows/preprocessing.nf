@@ -191,7 +191,7 @@ process MAKE_BEAD_GTRACK {
         outprefix="${sample}"
         args = []
         if (!lads.toString().isEmpty()) {
-            opts.push("--lads='${lads}'")
+            args.push("--lads='${lads}'")
         }
         args=args.join(" ")
         '''
@@ -231,7 +231,7 @@ process CHANGE_PLOIDY {
         if [ !{ploidy} -eq 1 ]; then
             cp '!{gtrack}' '!{outname}'
         else
-            change_ploidy_gtrack.py '!{gtrack}' > '!{outname}'
+            change_ploidy_gtrack.py '!{gtrack}' '!{ploidy}' > '!{outname}'
         fi
         '''
 }
