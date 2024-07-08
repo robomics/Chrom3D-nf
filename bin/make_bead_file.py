@@ -62,13 +62,17 @@ def generate_gtrack(beads: pd.DataFrame, sig_interactions: pd.DataFrame, lads: p
     for chrom1, start1, end1, chrom2, start2, end2 in sig_interactions.itertuples(index=False):
         r1 = (chrom1, start1, end1)
         r2 = (chrom2, start2, end2)
-        records.setdefault(r1, []).append(r2)
-        records.setdefault(r2, []).append(r1)
+
+        if r1 == r2:
+            continue
+
+        records.setdefault(r1, set()).add(r2)
+        records.setdefault(r2, set()).add(r1)
 
     for chrom, start, end in beads.itertuples(index=False):
         r = (chrom, start, end)
         if r not in records:
-            records[r] = ()
+            records[r] = set()
 
     data = []
     for k, v in records.items():
@@ -77,7 +81,7 @@ def generate_gtrack(beads: pd.DataFrame, sig_interactions: pd.DataFrame, lads: p
         if len(v) == 0:
             v = ["."]
         else:
-            v = [f"{chrom}:{start}-{end}" for chrom, start, end in v]
+            v = [f"{chrom}:{start}-{end}" for chrom, start, end in sorted(v)]
 
         data.append([*k, k_ucsc, "0.2", ".", ";".join(v)])
 
