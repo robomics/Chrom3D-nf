@@ -33,12 +33,14 @@ workflow CHROM3D {
             args
         )
 
-        ARCHIVE(
-            SIMULATE.out.cmm.groupTuple()
-        )
+        if (params.archive_models) {
+            ARCHIVE(
+                SIMULATE.out.cmm.groupTuple()
+            )
+        }
 
     emit:
-        tar = ARCHIVE.out.tar
+        models = SIMULATE.out.cmm.groupTuple()
 }
 
 
@@ -65,6 +67,10 @@ process GENERATE_SEEDS {
 }
 
 process SIMULATE {
+    publishDir "${params.publish_dir}/models/${sample}",
+        enabled: !!params.publish_dir && !params.archive_models,
+        mode: params.publish_dir_mode
+
     tag "${sample}_${id}"
 
     label 'error_retry'
@@ -112,6 +118,6 @@ process ARCHIVE {
     shell:
         outname="${sample}.tar.gz"
         '''
-        tar --transform 's,^,!{sample}/,' -czf '!{outname}' *.cmm
+        tar --transform 's,^,!{sample}/,' -chzf '!{outname}' *.cmm
         '''
 }

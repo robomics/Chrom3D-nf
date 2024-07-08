@@ -39,6 +39,7 @@ PREPROCESSING_PARAMS = [
 CHROM3D_PARAMS = [
     publish_dir: "${params.outdir}/chrom3d/",
     publish_dir_mode: params.publish_dir_mode,
+    archive_models: params.archive_models,
 ]
 
 include { SAMPLESHEET } from './subworkflows/samplesheet.nf'
@@ -70,6 +71,7 @@ workflow {
     log.info("-- chrom3d_args: ${params.chrom3d_args}")
     log.info("-- ploidy: ${params.ploidy}")
     log.info("-- number_of_models: ${params.number_of_models}")
+    log.info("-- archive_models: ${params.archive_models}")
 
     log.info("-- nchg_mad_max: ${params.nchg_mad_max}")
     log.info("-- nchg_bad_bin_fraction: ${params.nchg_bad_bin_fraction}")
