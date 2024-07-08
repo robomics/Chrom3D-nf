@@ -33,6 +33,18 @@ def make_cli() -> argparse.ArgumentParser:
     return cli
 
 
+def rename_edges(edges: str, suffix: str) -> str:
+    if edges == ".":
+        return edges
+
+    new_edges = []
+    for e in edges.split(";"):
+        chrom, _, coords = e.partition(":")
+        new_edges.append(f"{chrom}{suffix}:{coords}")
+
+    return ";".join(new_edges)
+
+
 def main():
     args = vars(make_cli().parse_args())
 
@@ -48,10 +60,14 @@ def main():
     charset = string.ascii_uppercase
     for _, row in beads.iterrows():
         for i in range(ploidy):
+            suffix = f"_{charset[i]}"
+
             row_ = row.copy()
-            row_["chrom"] += f"_{charset[i]}"
+
+            row_["chrom"] += suffix
             row_["tid"] = row["tid"].replace(row["chrom"], row_["chrom"])
-            row_["edges"] = row["edges"].replace(row["chrom"], row_["chrom"])
+            row_["edges"] = rename_edges(row["edges"], suffix)
+
             print("\t".join((str(x) for x in row_)))
 
 
