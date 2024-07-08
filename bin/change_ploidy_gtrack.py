@@ -50,6 +50,8 @@ def main():
         for i in range(ploidy):
             row_ = row.copy()
             row_["chrom"] += f"_{charset[i]}"
+            row_["tid"] = row["tid"].replace(row["chrom"], row_["chrom"])
+            row_["edges"] = row["edges"].replace(row["chrom"], row_["chrom"])
             print("\t".join((str(x) for x in row_)))
 
 
