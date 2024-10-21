@@ -4,7 +4,7 @@
 
 ARG CONTAINER_VERSION
 
-FROM ghcr.io/paulsengroup/hictk:1.0.0 AS base
+FROM ghcr.io/paulsengroup/hictk:2.0.0 AS base
 
 ARG CONTAINER_TITLE
 ARG CONTAINER_VERSION
